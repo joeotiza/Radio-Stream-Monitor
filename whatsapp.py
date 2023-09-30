@@ -7,7 +7,10 @@ import requests
 phone_number = "+254711223344"
 group_id = "Jp8a8ZH2D1AJHYEYTnkddM"
 #Allow the program to call on WhatsApp web the first time it is run
-first_time = True
+first_time = False
+
+double_check = 0
+string_check = ""
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -17,6 +20,7 @@ streaming_site_url = 'https://stream-13.zeno.fm/ud2u96xst5quv'  # Replace with t
 def check_site_status():
     try:
         okay = True
+        global double_check
         
         stations = "The following streams are not working:\n"
         
@@ -70,6 +74,11 @@ def check_site_status():
         #send a message at 8AM, noon, and 4PM regardless to ensure system is still online
         global first_time
         alert_time = morning or noon or evening or first_time
+
+        global string_check
+        if okay:
+            double_check = 0
+            string_check = ""
         
         waiting_time_to_send = 20
         close_tab = True
@@ -81,19 +90,30 @@ def check_site_status():
         if not okay or alert_time:
             first_time = False
 
-            if mode == "contact":
-                # Send a WhastApp message to an specific contact
-                pywhatkit.sendwhatmsg(phone_number, message, time_hour, time_minute, waiting_time_to_send, close_tab, waiting_time_to_close)
-            elif mode == "group":
-                # Send a WhastApp message to an specific group
-                pywhatkit.sendwhatmsg_to_group(group_id, message, time_hour, time_minute, waiting_time_to_send, close_tab, waiting_time_to_close)
-            else:
-                print("Error code: 97654")
-                print("Error Message: Please select a mode to send your message.")
-
-            #if a station is down, send alerts in 10 minute intervals
             if not okay:
-                time.sleep(10*60)
+                #check twice
+                if message == string_check:
+                    double_check += 1
+                string_check = message
+                #time.sleep(30)
+
+            if double_check >= 2 or alert_time:
+
+                if mode == "contact":
+                    # Send a WhastApp message to an specific contact
+                    pywhatkit.sendwhatmsg(phone_number, message, time_hour, time_minute, waiting_time_to_send, close_tab, waiting_time_to_close)
+                elif mode == "group":
+                    # Send a WhastApp message to an specific group
+                    pywhatkit.sendwhatmsg_to_group(group_id, message, time_hour, time_minute, waiting_time_to_send, close_tab, waiting_time_to_close)
+                else:
+                    print("Error code: 97654")
+                    print("Error Message: Please select a mode to send your message.")
+
+                #if a station is down, send alerts in 10 minute intervals
+                if not okay:
+                    time.sleep(10*60)
+                    #reset the double checking variable
+                    double_check = 0
     except requests.exceptions.RequestException as e:
         print(f'Error: Unable to access the streaming site.\n{str(e)}')
 
