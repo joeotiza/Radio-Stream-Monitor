@@ -3,6 +3,9 @@
 This Python program monitors streaming websites for downtime and sends WhatsApp text notifications when a site is inaccessible.  
 Additionally, it sends periodic alerts at 8 AM, noon, and 4 PM to confirm that the monitoring program is still running.  
 
+
+This script will run indefinitely, continuously checking the streaming sites and sending a WhatsApp notification if a site is down. If the script loses internet connection, it will restart and continue monitoring once the connection is restored.
+
 ## Prerequisites
 Before running the program, make sure you have the following prerequisites installed:  
 - Python (3.x recommended)
